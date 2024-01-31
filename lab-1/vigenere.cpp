@@ -1,13 +1,20 @@
 #include <iostream>
 #include <fstream>
 
-std::string encryptVigenere(std::string text, std::string keyword) {
+std::string encryptVigenere(std::string text, std::string keyword, bool encrypt = true) {
     std::string result = "";
     int keywordIndex = 0;
     for (int i = 0; i < text.length(); i++) {
         if (isalpha(text[i])) {
-            char encryptedChar = (toupper(text[i]) - 'A' + (toupper(keyword[keywordIndex]) - 'A')) % 26 + 'A';
-            result += encryptedChar;
+            char base = isupper(text[i]) ? 'A' : 'a';
+            char offset = isupper(keyword[keywordIndex]) ? 'A' : 'a';
+            int messageIndex = text[i] - base;
+            int keyCharIndex = keyword[keywordIndex] - offset;
+            if (encrypt) {
+                result += static_cast<char>((messageIndex + keyCharIndex) % 26 + base);
+            } else {
+                result += static_cast<char>((messageIndex - keyCharIndex + 26) % 26 + base);
+            }
             keywordIndex = (keywordIndex + 1) % keyword.length();
         } else {
             result += text[i];
@@ -17,18 +24,7 @@ std::string encryptVigenere(std::string text, std::string keyword) {
 }
 
 std::string decryptVigenere(std::string text, std::string keyword) {
-    std::string result = "";
-    int keywordIndex = 0;
-    for (int i = 0; i < text.length(); i++) {
-        if (isalpha(text[i])) {
-            char decryptedChar = (toupper(text[i]) - toupper(keyword[keywordIndex]) + 26) % 26 + 'A';
-            result += decryptedChar;
-            keywordIndex = (keywordIndex + 1) % keyword.length();
-        } else {
-            result += text[i];
-        }
-    }
-    return result;
+    return encryptVigenere(text, keyword, false);
 }
 
 int main() {
