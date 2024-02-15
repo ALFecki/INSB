@@ -2,19 +2,19 @@
 
 #include <fstream>
 #include <iostream>
-#include <string>
 #include <limits>
+#include <string>
 
 std::string encryptCaesar(std::string text, int shift) {
     std::string result = "";
     int length = text.length();
 
-    for (int i = 0; i < length; ++i) {
-        if (isalpha(text[i])) {
-            char ch = isupper(text[i]) ? 'A' : 'a';
-            result += (text[i] - ch + shift) % 26 + ch;
+    for (auto& c : text) {
+        if (isalpha(c)) {
+            char ch = isupper(c) ? 'A' : 'a';
+            result += (c - ch + shift) % 26 + ch;
         } else {
-            result += text[i];
+            result += c;
         }
     }
 
@@ -70,7 +70,7 @@ int main() {
         std::string encryptedText = encryptCaesar(inputText, shift);
         std::string decryptedText = decryptCaesar(encryptedText, shift);
 
-        outputFile << "Encrypted text:\n" << encryptedText << std::endl;
+        outputFile << "Encrypted text:\n" << encryptedText << std::endl << std::endl;
         outputFile << "Decrypted text:\n" << decryptedText << std::endl;
 
         outputFile.close();
