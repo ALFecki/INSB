@@ -179,7 +179,7 @@ string DES::encryptAnyString(string plaintext) {
     this->bitskey = charToBit(this->key.c_str());
     stringstream result;
     plaintext += string(8 - (plaintext.size() % 8), '\0');
-    
+
     for (size_t current = 0; current < plaintext.size() / 8; current++) {
         string tmp = plaintext.substr(8 * current, 8);
         bitset<64> plain = charToBit(tmp.c_str());
@@ -201,11 +201,13 @@ string DES::decryptAnyString(string cipher) {
         bitset<64> plain = DES_decrypt(cipher_set);
         plain = change(plain);
         string res = plain.to_string();
+
         for (int i = 0; i < 8; i++) {
             string tmp = plain.to_string().substr(0 + 8 * i, 8);
             std::reverse(tmp.begin(), tmp.end());
             res.replace(res.begin() + i * 8, res.begin() + 8 * (i + 1), tmp);
         }
+
         plain = bitset<64>(res);
         result << string(reinterpret_cast<char*>(&plain), 8);
     }
