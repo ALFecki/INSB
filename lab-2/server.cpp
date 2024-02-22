@@ -1,4 +1,11 @@
+#include <chrono>
+
 #include "httplib.h"
+
+using namespace std::chrono_literals;
+
+const std::string PASSWORD = "testpassword";
+const std::string TGS = "authorize_server";
 
 struct ClientInfo {
     std::string key;
@@ -28,14 +35,20 @@ void initMessage(const httplib::Request& request, httplib::Response& response) {
         return;
     }
 
+    auto current_time = std::chrono::system_clock::now();
+    auto end_time = current_time + 1h;
+
+    std::string TGT = id + ";" + TGS + ";" +
+                      std::to_string(std::chrono::system_clock::to_time_t(current_time)) + ";" +
+                      std::to_string(std::chrono::system_clock::to_time_t(end_time)) + ";" + clients[id].key;
 }
 
-
 int main() {
+    httplib::Server svr;
 
-    Server svr;
-
-    svr.Get("/hi", [](const Request& req, Response& res) { res.set_content("Hello World!", "text/plain"); });
+    svr.Get("/hi", [](const httplib::Request& req, httplib::Response& res) {
+        res.set_content("Hello World!", "text/plain");
+    });
 
     svr.listen("0.0.0.0", 8080);
 }
