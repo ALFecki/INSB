@@ -9,6 +9,19 @@ using namespace std::chrono_literals;
 const std::string PASSWORD = "testpassword";
 const std::string TGS = "authorize_server";
 
+
+std::vector<std::string> split(const std::string &s, char delim) {
+    std::vector<std::string> result;
+    std::stringstream ss(s);
+    std::string item;
+    while(std::getline(ss, item, delim)) {
+        result.push_back(item);
+    }
+    
+    return result;
+}
+
+
 struct ClientInfo {
     std::string key;
     std::string tgs;
@@ -71,7 +84,7 @@ void grant(const httplib::Request& request, httplib::Response& response) {
         return;
     }
 
-    auto data = Utils::Split(request.body, ';');
+    auto data = split(request.body, ';');
 
     cout << "Received data in grant from client '" << id << "':" << endl;
 
@@ -79,10 +92,10 @@ void grant(const httplib::Request& request, httplib::Response& response) {
         cout << cur << endl;
     }
 
-    DES c;
-    c.setKey(clients[id].tgs_key);
+    DES des_encryptor;
+    des_encryptor.setKey(clients[id].tgs);
 
-    auto aut = Utils::Split(c.decryptAnyString(data[1]), ';');
+    auto aut = split(des_encryptor.decryptAnyString(data[1]), ';');
 
     cout << "Received aut from client '" << id << "':" << endl;
 
@@ -103,9 +116,9 @@ void grant(const httplib::Request& request, httplib::Response& response) {
 
     auto ticket_creation = chrono::system_clock::from_time_t(std::atoll(aut.back().c_str()));
 
-    c.setKey(MASTER_PASSWORD);
+    des_encryptor.setKey(PASSWORD);
 
-    auto tgt = Utils::Split(c.decryptAnyString(data.front()), ';');
+    auto tgt = split(des_encryptor.decryptAnyString(data.front()), ';');
 
     cout << "Received tgt from client '" << id << "':" << endl;
 
@@ -122,22 +135,22 @@ void grant(const httplib::Request& request, httplib::Response& response) {
         return;
     }
 
-    c.setKey(servers[server_id].tgs_key);
+    des_encryptor.setKey(servers[server_id].tgs);
 
     auto current_time = chrono::system_clock::now();
     auto end_time = current_time + 24h;
 
     string tgs_server = id + ";" + server_id + ";" + to_string(chrono::system_clock::to_time_t(current_time)) + ";" + to_string(chrono::system_clock::to_time_t(end_time)) + ";" + clients[id].c_ss;
 
-    string tgs_server_encrypted = c.encryptAnyString(tgs_server);
+    string tgs_server_encrypted = des_encryptor.encryptAnyString(tgs_server);
 
     string answer = tgs_server_encrypted + ";" + clients[id].c_ss;
 
     cout << "Encrypting response to '" << id << "': " << answer << endl;
 
-    c.setKey(clients[id].tgs_key);
+    des_encryptor.setKey(clients[id].tgs);
 
-    string answer_encrypted = c.encryptAnyString(answer);
+    string answer_encrypted = des_encryptor.encryptAnyString(answer);
 
     response.body = answer_encrypted;
     response.status = 200;
