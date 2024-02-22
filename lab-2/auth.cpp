@@ -1,5 +1,5 @@
-#include <des/des.h>
-
+#include "des/des.h"
+#include "utils.h"
 #include <chrono>
 
 #include "httplib.h"
@@ -8,18 +8,6 @@ using namespace std::chrono_literals;
 
 const std::string PASSWORD = "testpassword";
 const std::string TGS = "authorize_server";
-
-
-std::vector<std::string> split(const std::string &s, char delim) {
-    std::vector<std::string> result;
-    std::stringstream ss(s);
-    std::string item;
-    while(std::getline(ss, item, delim)) {
-        result.push_back(item);
-    }
-    
-    return result;
-}
 
 
 struct ClientInfo {

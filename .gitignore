@@ -1,6 +1,6 @@
 # Prerequisites
 *.d
-
+build/
 .vscode/
 
 # Compiled Object files
