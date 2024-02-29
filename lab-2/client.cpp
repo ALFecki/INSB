@@ -8,7 +8,7 @@ using namespace std;
 
 using namespace httplib;
 
-constexpr const char* server = "server";
+constexpr const char* server = "SS";
 
 int main() {
     Client cli("http://127.0.0.1:8080");
@@ -20,7 +20,7 @@ int main() {
         cout << "Enter password (8 symbols): ";
         cin >> password;
     }
-    auto response = cli.Get("/start/" + username);
+    auto response = cli.Get("/init/" + username);
 
     if (response->status != 200) {
         cout << "Auth server answered with non 200 code: " << response->status << endl;
@@ -71,8 +71,6 @@ int main() {
 
     auto request_to_server = tgs + ";" + c.encryptAnyString(aut);
 
-    cout << "Request to SS: " << request_to_server << endl;
-
     response = hello.Post("/hello", request_to_server, "plain/text");
 
     if (response->status != 200) {
@@ -90,6 +88,6 @@ int main() {
 
     cout << "OK!" << endl;
     cout << "Server responded: " << answer.front() << endl;
-    
+
     return 0;
 }

@@ -38,11 +38,8 @@ int main() {
         cout << "Received aut from client: " << endl;
 
         for (const auto& cur : aut) {
-            cout << "!!!" << endl;
             cout << cur << endl;
         }
-        std::cout << client_id << endl;
-        cout << string(aut.front()) << endl;
         
         if (client_id != string(aut.front())) {
             response.status = 403;

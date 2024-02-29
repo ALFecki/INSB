@@ -27,17 +27,17 @@ const string TGS = "authoritive_server";
 
 map<string, ClientInfo> clients = {
     {"newusername", {
-                        .key = "mysuper1",
+                        .key = "password",
                         .tgs_key = "mysuper2",
                         .c_ss = "internal",
                         .allowed_servers = {
-                            "server",
+                            "SS",
                         },
                     }},
 };
 
 map<string, ServerInfo> servers = {
-    {"server", {
+    {"SS", {
                    .tgs_key = "serverkc",
                }}};
 
@@ -159,7 +159,7 @@ void grant(const Request& request, Response& response) {
 int main() {
     Server svc;
 
-    svc.Get("/start/:id", initMessage);
+    svc.Get("/init/:id", initMessage);
 
     svc.Post("/grant/:id", grant);
 
