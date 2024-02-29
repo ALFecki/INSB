@@ -2,7 +2,7 @@
 #include <map>
 #include <iostream>
 #include <chrono>
-#include "des.h"
+#include "des/des.h"
 #include "utils.h"
 
 using namespace httplib;
@@ -26,7 +26,7 @@ const string MASTER_PASSWORD = "password";
 const string TGS = "authoritive_server";
 
 map<string, ClientInfo> clients = {
-    {"vadvergasov", {
+    {"newusername", {
                         .key = "mysuper1",
                         .tgs_key = "mysuper2",
                         .c_ss = "internal",
@@ -84,7 +84,7 @@ void grant(const Request& request, Response& response) {
         return;
     }
 
-    auto data = Utils::Split(request.body, ';');
+    auto data = split(request.body, ';');
 
     cout << "Received data in grant from client '" << id << "':" << endl;
 
@@ -95,7 +95,7 @@ void grant(const Request& request, Response& response) {
     DES c;
     c.setKey(clients[id].tgs_key);
 
-    auto aut = Utils::Split(c.decryptAnyString(data[1]), ';');
+    auto aut = split(c.decryptAnyString(data[1]), ';');
 
     cout << "Received aut from client '" << id << "':" << endl;
 
@@ -118,7 +118,7 @@ void grant(const Request& request, Response& response) {
 
     c.setKey(MASTER_PASSWORD);
 
-    auto tgt = Utils::Split(c.decryptAnyString(data.front()), ';');
+    auto tgt = split(c.decryptAnyString(data.front()), ';');
 
     cout << "Received tgt from client '" << id << "':" << endl;
 

@@ -1,5 +1,5 @@
 #include <iostream>
-#include "des.h"
+#include "des/des.h"
 #include "httplib.h"
 #include "utils.h"
 #include <chrono>
@@ -80,13 +80,16 @@ int main() {
         return -1;
     }
 
-    // cout << "Server responded with: " << c.decryptAnyString(resp) << endl;
 
-    if (std::atoll(c.decryptAnyString(response->body).c_str()) != current_time + 1) {
+    auto answer = split(c.decryptAnyString(response->body), ';');
+    
+    if (std::atoll(answer.back().c_str()) != current_time + 1) {
         cout << "Server verification failed!" << endl;
         return 1;
     }
-    cout << "OK!" << endl;
 
+    cout << "OK!" << endl;
+    cout << "Server responded: " << answer.front() << endl;
+    
     return 0;
 }

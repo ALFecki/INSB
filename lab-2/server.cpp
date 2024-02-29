@@ -1,5 +1,5 @@
-#include <httplib.h>
-#include <des.h>
+#include "httplib.h"
+#include "des/des.h"
 #include "utils.h"
 #include <iostream>
 #include <chrono>
@@ -51,10 +51,10 @@ int main() {
             return;
         }
 
-        string answer = "";
+        string answer = "HELLO, WORLD!";
 
         response.status = 200;
-        response.body = c.encryptAnyString(to_string(std::atoll(aut.back().c_str()) + 1));
+        response.body = c.encryptAnyString(answer + ';' + to_string(std::atoll(aut.back().c_str()) + 1));
     });
 
     svc.listen("0.0.0.0", 8081);
