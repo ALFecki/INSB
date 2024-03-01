@@ -3,6 +3,8 @@
 #include "httplib.h"
 #include "utils.h"
 #include <chrono>
+#include <termios.h>
+
 
 using namespace std;
 
@@ -10,20 +12,43 @@ using namespace httplib;
 
 constexpr const char* server = "SS";
 
+void disableEcho() {
+    termios term;
+    tcgetattr(STDIN_FILENO, &term);
+    term.c_lflag &= ~ECHO;
+    tcsetattr(STDIN_FILENO, TCSANOW, &term);
+}
+
+void enableEcho() {
+    termios term;
+    tcgetattr(STDIN_FILENO, &term);
+    term.c_lflag |= ECHO;
+    tcsetattr(STDIN_FILENO, TCSANOW, &term);
+}
+
+
 int main() {
     Client cli("http://127.0.0.1:8080");
 
     string username, password;
-    cout << "Enter username: ";
+    
+    cout << "Enter login: ";
     cin >> username;
-    while (password.size() != 8) {
-        cout << "Enter password (8 symbols): ";
-        cin >> password;
-    }
+    
+    char ch;
+    disableEcho();
+
+    cout << "Enter password: ";
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::getline(std::cin, password);
+    cout << endl;
+
+    enableEcho();
+
     auto response = cli.Get("/init/" + username);
 
     if (response->status != 200) {
-        cout << "Auth server answered with non 200 code: " << response->status << endl;
+        cout << "Auth server answered with " << response->status << " code" << endl;
         return -1;
     }
 
@@ -34,7 +59,7 @@ int main() {
 
     string result = c.decryptAnyString(resp);
 
-    cout << "First auth server response: " << result << endl;
+    cout << "STEP 2: Auth server response: " << result << endl;
 
     string tgs_key = split(result, ';').back().substr(0, 8);
 
@@ -55,7 +80,7 @@ int main() {
 
     result = c.decryptAnyString(response->body);
 
-    cout << "Second auth server response: " << result << endl;
+    cout << "STEP 4: Auth server response: " << result << endl;
 
     Client hello("http://localhost:8081");
 
@@ -78,7 +103,6 @@ int main() {
         return -1;
     }
 
-
     auto answer = split(c.decryptAnyString(response->body), ';');
     
     if (std::atoll(answer.back().c_str()) != current_time + 1) {
@@ -86,8 +110,8 @@ int main() {
         return 1;
     }
 
-    cout << "OK!" << endl;
-    cout << "Server responded: " << answer.front() << endl;
+    cout << "Server authetication succeed" << endl;
+    cout << "Server responded with: " << answer.front() << endl;
 
     return 0;
 }
