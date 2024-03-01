@@ -50,6 +50,8 @@ void initMessage(const Request& request, Response& response) {
         return;
     }
 
+    cout << "STEP 1: Client '" << id << "' requested to auth" << endl;
+
     DES c;
 
     auto current_time = chrono::system_clock::now();
@@ -65,11 +67,9 @@ void initMessage(const Request& request, Response& response) {
 
     c.setKey(clients[id].key);
 
-    cout << "Encrypting message: '" << answer << "' to '" << id << "'" << endl;
+    cout << "Message for client before encrypting: " << answer << endl;
 
     string encrypted = c.encryptAnyString(answer);
-
-    // cout << "Sending message: '" << encrypted << "' to '" << id << "'" << endl;
 
     response.set_content(encrypted.c_str(), encrypted.size(), "text/plain");
     response.status = 200;
@@ -86,7 +86,7 @@ void grant(const Request& request, Response& response) {
 
     auto data = split(request.body, ';');
 
-    cout << "Received data in grant from client '" << id << "':" << endl;
+    cout << "STEP 3: Data from client '" << id << "':" << endl;
 
     for (const auto& cur : data) {
         cout << cur << endl;
@@ -97,11 +97,7 @@ void grant(const Request& request, Response& response) {
 
     auto aut = split(c.decryptAnyString(data[1]), ';');
 
-    cout << "Received aut from client '" << id << "':" << endl;
-
-    for (const auto& cur : aut) {
-        cout << cur << endl;
-    }
+    cout << "STEP 3: Aut from client: name='" << id << "' time='" << aut.back() << "'" << endl;
 
     string server_id = data.back().c_str();
 
@@ -120,7 +116,7 @@ void grant(const Request& request, Response& response) {
 
     auto tgt = split(c.decryptAnyString(data.front()), ';');
 
-    cout << "Received tgt from client '" << id << "':" << endl;
+    cout << "STEP 3: TGT from client '" << id << "':" << endl;
 
     for (const auto& cur : tgt) {
         cout << cur << endl;
@@ -146,7 +142,7 @@ void grant(const Request& request, Response& response) {
 
     string answer = tgs_server_encrypted + ";" + clients[id].c_ss;
 
-    cout << "Encrypting response to '" << id << "': " << answer << endl;
+    cout << "Response to '" << id << "' before encrypting: " << answer << endl;
 
     c.setKey(clients[id].tgs_key);
 
