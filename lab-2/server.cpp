@@ -25,10 +25,10 @@ int main() {
 
         string client_id = tgs.front();
 
-        cout << "STEP 5: TGS from client '" << client_id << "': " << endl;
-        cout << "ss=" << tgs[1] << endl;
-        cout << "t=" << tgs[2] << endl;
-        cout << "p=" << tgs[3] << endl;
+        cout << "STEP 5: TGS from client '" << client_id << "': ";
+        cout << " ss=" << tgs[1] << ", ";
+        cout << "t=" << tgs[2] << ", ";
+        cout << "p=" << tgs[3] << ", ";
         cout << "Kc_ss=" << tgs[4] << endl;
 
         c.setKey(c_ss);
@@ -45,7 +45,7 @@ int main() {
         }
 
         cout << "Success client authorization!" << endl;
-        
+
         string answer = "HELLO, WORLD!";
 
         response.status = 200;

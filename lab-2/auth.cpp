@@ -116,11 +116,12 @@ void grant(const Request& request, Response& response) {
 
     auto tgt = split(c.decryptAnyString(data.front()), ';');
 
-    cout << "STEP 3: TGT from client '" << id << "':" << endl;
-
-    for (const auto& cur : tgt) {
-        cout << cur << endl;
-    }
+    cout << "STEP 3: TGT from client" << ": ";
+    cout << "id=" << tgt[0] << ", ";
+    cout << "tgs=" << tgt[1] << ", ";
+    cout << "t=" << tgt[2] << ", ";
+    cout << "p=" << tgt[3] << ", ";
+    cout << "Kc_tgs=" << tgt[4] << endl;
 
     if (
         chrono::system_clock::from_time_t(std::atoll(tgt[2].c_str())) > ticket_creation ||
