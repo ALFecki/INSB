@@ -22,25 +22,21 @@ int main() {
         auto tgs = split(c.decryptAnyString(split(request.body, ';').front()), ';');
 
         string c_ss = tgs.back();
-        cout << "C_SS from client: " << c_ss << endl;
+
         string client_id = tgs.front();
 
-        cout << "Received tgs from client '" << client_id << "': " << endl;
-
-        for (const auto& cur : tgs) {
-            cout << cur << endl;
-        }
+        cout << "STEP 5: TGS from client '" << client_id << "': " << endl;
+        cout << "ss=" << tgs[1] << endl;
+        cout << "t=" << tgs[2] << endl;
+        cout << "p=" << tgs[3] << endl;
+        cout << "Kc_ss=" << tgs[4] << endl;
 
         c.setKey(c_ss);
 
         auto aut = split(c.decryptAnyString(split(request.body, ';').back()), ';');
 
-        cout << "Received aut from client: " << endl;
+        cout << "STEP 5: Aut from client: name='" << aut.front() << "' time='" << aut.back() << "'" << endl;
 
-        for (const auto& cur : aut) {
-            cout << cur << endl;
-        }
-        
         if (client_id != string(aut.front())) {
             response.status = 403;
             const char* resp = "Forbidden (incorrect user)";
@@ -48,6 +44,8 @@ int main() {
             return;
         }
 
+        cout << "Success client authorization!" << endl;
+        
         string answer = "HELLO, WORLD!";
 
         response.status = 200;
