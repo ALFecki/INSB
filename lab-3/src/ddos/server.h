@@ -103,61 +103,38 @@
 // }
 
 #include <boost/asio.hpp>
+#include <boost/asio/io_context.hpp>
 #include <iostream>
-#include <conn.h>
+
+#include "conn.h"
+
+using namespace boost::asio;
+using namespace boost::asio::ip;
+
+using namespace boost::asio;
 
 class TCPServer {
 public:
-	TCPServer(boost::asio::io_service& io_service, int port)
-			: acceptor_(io_service, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port)),
-				socket_(io_service) {
+	TCPServer(boost::asio::io_context& io_context, short port)
+			: io_context_(io_context), acceptor_(io_context, ip::tcp::endpoint(ip::tcp::v4(), port)) {
 		accept();
 	}
 
-	    void accept() {
-	        auto tcp_conn = connection::create(io_context_);
-	        std::cout << conn_cnt_++ << std::endl;
-	        acceptor_.async_accept(tcp_conn->socket(),
-	                               std::bind(&server::handle_accept, this, tcp_conn,
-	                                         std::placeholders::_1));
-	    }
-
-	//     void handle_accept(std::shared_ptr<connection> tcp_conn,
-	//                        const boost::system::error_code& ec) {
-	//         if (!ec) {
-	//             tcp_conn->start();
-	//         } else {
-	//             std::cout << ec.message() << '\n';
-	//         }
-	//         accept();
-	//     }
-private:
-	void StartAccept() {
-		//         acceptor_.async_accept(tcp_conn->socket(),
-		//                                std::bind(&server::handle_accept, this, tcp_conn,
-		//                                          std::placeholders::_1));
-		acceptor_.async_accept(socket_, [this](boost::system::error_code ec) {
-			if (!ec) {
-				std::cout << "New connection established." << std::endl;
-				// Обработка нового подключения
-
-				// Продолжаем принимать подключения
-				StartAccept();
-			}
-		});
+	void accept() {
+		auto tcp_conn = Connection::create(io_context_);
+		acceptor_.async_accept(tcp_conn->socket(),
+													 std::bind(&TCPServer::handle_accept, this, tcp_conn, std::placeholders::_1));
 	}
 
+	void handle_accept(std::shared_ptr<Connection> tcp_conn, const boost::system::error_code& ec) {
+		if (ec) {
+			std::cout << ec.message() << '\n';
+		}
+		accept();
+	}
+
+private:
 	boost::asio::ip::tcp::acceptor acceptor_;
-	boost::asio::ip::tcp::socket socket_;
+	// boost::asio::ip::tcp::socket socket_;
+	io_context& io_context_;
 };
-
-int main() {
-	boost::asio::io_service io_service;
-	int port = 1234;
-
-	TCPServer server(io_service, port);
-
-	io_service.run();
-
-	return 0;
-}
