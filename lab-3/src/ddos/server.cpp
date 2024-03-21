@@ -1,20 +1,32 @@
-#include "server.h"
+#include <boost/asio.hpp>
+#include <boost/asio/io_context.hpp>
+#include <iostream>
 
-TCPServer::TCPServer(boost::asio::io_context& io_context, short port)
-		: io_context_(io_context),
-			acceptor_(io_context, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port)) {
-	accept();
-}
+#include "libs/TCPServer.h"
 
-void TCPServer::accept() {
-	auto tcp_conn = Connection::create(io_context_);
-	acceptor_.async_accept(tcp_conn->socket(),
-												 std::bind(&TCPServer::handle_accept, this, tcp_conn, std::placeholders::_1));
-}
+using namespace boost::asio;
+using namespace boost::asio::ip;
 
-void TCPServer::handle_accept(std::shared_ptr<Connection> tcp_conn, const boost::system::error_code& ec) {
-	if (ec) {
-		std::cout << ec.message() << '\n';
+using namespace boost::asio;
+
+int main(int argc, char* argv[]) {
+	if (argc < 3) {
+		std::cerr << "Usage: ./server -p <port>\n";
+		return 1;
 	}
-	accept();
+
+	if (std::string(argv[1]) != "-p") {
+		std::cout << "Unknown flag: " << argv[1] << "\n";
+		return 1;
+	}
+
+	unsigned short port = static_cast<unsigned short>(std::atoi(argv[2]));
+
+	boost::asio::io_context io_context;
+	boost::asio::ip::tcp::acceptor acceptor_(io_context,
+																					 boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port));
+
+	TCPServer s(io_context, port);
+	io_context.run();
+	return 0;
 }

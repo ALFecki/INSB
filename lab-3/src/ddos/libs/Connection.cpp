@@ -1,4 +1,4 @@
-#include "conn.h"
+#include "Connection.h"
 
 Connection::Connection(boost::asio::io_context& io_context) : sock(io_context) {
 	buffer.prepare(1024);

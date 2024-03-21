@@ -14,5 +14,5 @@ private:
 	void printMessage(const std::string&);
 
 	boost::asio::ip::tcp::socket sock;
-	streambuf buffer;
+	boost::asio::streambuf buffer;
 };
