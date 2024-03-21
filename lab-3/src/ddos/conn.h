@@ -11,7 +11,7 @@ class Connection : public std::enable_shared_from_this<Connection> {
 public:
 	ip::tcp::socket& socket();
 
-	static auto create(boost::asio::io_context&);
+	static std::shared_ptr<Connection> create(boost::asio::io_context&);
 
 private:
 	Connection(boost::asio::io_context&);

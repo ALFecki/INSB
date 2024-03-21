@@ -115,26 +115,13 @@ using namespace boost::asio;
 
 class TCPServer {
 public:
-	TCPServer(boost::asio::io_context& io_context, short port)
-			: io_context_(io_context), acceptor_(io_context, ip::tcp::endpoint(ip::tcp::v4(), port)) {
-		accept();
-	}
-
-	void accept() {
-		auto tcp_conn = Connection::create(io_context_);
-		acceptor_.async_accept(tcp_conn->socket(),
-													 std::bind(&TCPServer::handle_accept, this, tcp_conn, std::placeholders::_1));
-	}
-
-	void handle_accept(std::shared_ptr<Connection> tcp_conn, const boost::system::error_code& ec) {
-		if (ec) {
-			std::cout << ec.message() << '\n';
-		}
-		accept();
-	}
+	TCPServer(boost::asio::io_context&, short);
 
 private:
+	void accept();
+
+	void handle_accept(std::shared_ptr<Connection>, const boost::system::error_code&);
+
 	boost::asio::ip::tcp::acceptor acceptor_;
-	// boost::asio::ip::tcp::socket socket_;
 	io_context& io_context_;
 };
