@@ -2,14 +2,9 @@
 #include <boost/asio/io_context.hpp>
 #include <iostream>
 
-using namespace boost::asio;
-using namespace boost::asio::ip;
-
-using namespace boost::asio;
-
 class Connection : public std::enable_shared_from_this<Connection> {
 public:
-	ip::tcp::socket& socket();
+	boost::asio::ip::tcp::socket& socket();
 
 	static std::shared_ptr<Connection> create(boost::asio::io_context&);
 
@@ -18,6 +13,6 @@ private:
 
 	void printMessage(const std::string&);
 
-	ip::tcp::socket sock;
+	boost::asio::ip::tcp::socket sock;
 	streambuf buffer;
 };

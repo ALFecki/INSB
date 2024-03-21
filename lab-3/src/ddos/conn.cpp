@@ -8,7 +8,7 @@ std::shared_ptr<Connection> Connection::create(boost::asio::io_context& io_conte
 	return std::shared_ptr<Connection>(new Connection(io_context));
 }
 
-ip::tcp::socket& Connection::socket() {
+boost::asio::ip::tcp::socket& Connection::socket() {
 	return sock;
 }
 
