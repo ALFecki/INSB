@@ -23,8 +23,6 @@ int main(int argc, char* argv[]) {
 	unsigned short port = static_cast<unsigned short>(std::atoi(argv[2]));
 
 	boost::asio::io_context io_context;
-	boost::asio::ip::tcp::acceptor acceptor_(io_context,
-																					 boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port));
 
 	TCPServer s(io_context, port);
 	io_context.run();
