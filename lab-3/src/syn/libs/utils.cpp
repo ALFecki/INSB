@@ -1,9 +1,10 @@
 // #include <arpa/inet.h>
 // #include <errno.h>
+#include <arpa/inet.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
-#include <arpa/inet.h>
+
 #include <memory>
 // #include <pthread.h>
 // #include <stdbool.h>
@@ -24,8 +25,7 @@
 		exit(EXIT_FAILURE);           \
 	} while (0)
 
-struct FakeHeader	 // for checksum
-{
+struct FakeHeader {
 	unsigned int sourceAddress;
 	unsigned int destAddress;
 	unsigned char placeholder;
@@ -59,42 +59,51 @@ unsigned short checksum(unsigned short *ptr, int nbytes) {
 }
 
 std::unique_ptr<iphdr> fillIPHeader(char datagram[4096], const char source_ip[32], struct sockaddr_in sin) {
-	iphdr *iph = (struct iphdr *)datagram;
+	iphdr *ipHeader = (struct iphdr *)datagram;
 
-	iph->ihl = 5;
-	iph->version = 4;
-	iph->tos = 0;
-	iph->tot_len = sizeof(struct ip) + sizeof(struct tcphdr);
-	iph->id = htons(54321);
-	iph->frag_off = 0;
-	iph->ttl = 255;
-	iph->protocol = IPPROTO_TCP;
-	iph->check = 0;
-	iph->saddr = inet_addr(source_ip);
-	iph->daddr = sin.sin_addr.s_addr;
-	iph->check = checksum((unsigned short *)datagram, iph->tot_len >> 1);
+	ipHeader->ihl = 5;
+	ipHeader->version = 4;
+	ipHeader->tos = 0;
+	ipHeader->tot_len = sizeof(struct ip) + sizeof(struct tcphdr);
+	ipHeader->id = htons(54321);
+	ipHeader->frag_off = 0;
+	ipHeader->ttl = 255;
+	ipHeader->protocol = IPPROTO_TCP;
+	ipHeader->check = 0;
+	ipHeader->saddr = inet_addr(source_ip);
+	ipHeader->daddr = sin.sin_addr.s_addr;
+	ipHeader->check = checksum((unsigned short *)datagram, ipHeader->tot_len >> 1);
 
-    return std::unique_ptr<iphdr>(iph);
+	return std::unique_ptr<iphdr>(ipHeader);
 }
 
-std::unique_ptr<tcphdr> fillTCPHeader(char datagram[4096] ) {
-    struct tcphdr *tcph = (struct tcphdr *)(datagram + sizeof(struct ip));
+std::unique_ptr<tcphdr> fillTCPHeader(char datagram[4096]) {
+	struct tcphdr *tcpHeader = (struct tcphdr *)(datagram + sizeof(struct ip));
 
-    tcph->source = htons(1234);
-    tcph->dest = htons(8000);
-    tcph->seq = 0;
-    tcph->ack_seq = 0;
-    tcph->doff = 5;
-    tcph->fin = 0;
-    tcph->syn = 1;
-    tcph->rst = 0;
-    tcph->psh = 0;
-    // tcph->ack = 0;
-    tcph->urg = 0;
-    tcph->window = htons(5840);
-    tcph->check = 0;
-    tcph->urg_ptr = 0;
+	tcpHeader->source = htons(1234);
+	tcpHeader->dest = htons(8000);
+	tcpHeader->seq = 0;
+	tcpHeader->ack_seq = 0;
+	tcpHeader->doff = 5;
+	tcpHeader->fin = 0;
+	tcpHeader->syn = 1;
+	tcpHeader->rst = 0;
+	tcpHeader->psh = 0;
+	// tcph->ack = 0;
+	tcpHeader->urg = 0;
+	tcpHeader->window = htons(5840);
+	tcpHeader->check = 0;
+	tcpHeader->urg_ptr = 0;
 
-    return std::unique_ptr<tcphdr>(tcph);
+	return std::unique_ptr<tcphdr>(tcpHeader);
 }
 
+FakeHeader fillFakeHeader(const char source_ip[32], struct sockaddr_in sin) {
+	struct FakeHeader fakeHeader;
+	fakeHeader.sourceAddress = inet_addr(source_ip);
+	fakeHeader.destAddress = sin.sin_addr.s_addr;
+	fakeHeader.placeholder = 0;
+	fakeHeader.protocol = IPPROTO_TCP;
+	fakeHeader.tcpLength = htons(20);
+	return fakeHeader;
+}
