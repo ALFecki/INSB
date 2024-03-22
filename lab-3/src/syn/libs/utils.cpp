@@ -9,12 +9,11 @@
 
 #define LISTEN_BACKLOG 50
 
-#define handle_error_en(err, msg) \
-	do {                            \
-		errno = err;                  \
-		perror(msg);                  \
-		exit(EXIT_FAILURE);           \
-	} while (0)
+void handle_error_en(int err, const char* msg) {
+    errno = err;
+    perror(msg);
+    exit(EXIT_FAILURE);
+}
 
 struct FakeHeader {
 	unsigned int sourceAddress;

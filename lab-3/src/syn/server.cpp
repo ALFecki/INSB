@@ -10,11 +10,15 @@
 #include <atomic>
 #include <iostream>
 #include <memory>
+#include <thread>
 
 #include "libs/utils.cpp"
 
 int sock_client;
-std::atomic<long long> G_CNT(0);
+
+std::atomic<long long> G_ACK_CNT(0);
+std::atomic<long long> G_SYN_CNT(0);
+
 bool is_connected = false;
 
 void *tcp_shk(void *arg) {
@@ -24,7 +28,7 @@ void *tcp_shk(void *arg) {
 	memset(datagram, 0, 4096);
 
 	struct sockaddr_in sin;
-	
+
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(8000);
 	sin.sin_addr.s_addr = inet_addr(source_ip);
@@ -32,6 +36,7 @@ void *tcp_shk(void *arg) {
 	auto iph = fillIPHeader(datagram, source_ip, sin);
 	auto tcph = fillTCPHeader(datagram);
 	tcph->ack = 1;
+
 	auto psh = fillFakeHeader(source_ip, sin);
 
 	memcpy(&psh.tcp, tcph, sizeof(struct tcphdr));
@@ -40,10 +45,9 @@ void *tcp_shk(void *arg) {
 
 	send(sock_client, datagram, strlen(datagram), 0);
 
-	std::cout << "send SYN+ACK, waiting for ACK " << std::endl;
+	G_ACK_CNT++;
+	std::cout << "ACK №" << G_ACK_CNT << " sended" << std::endl;
 	char msg[4000];
-	G_CNT++;
-	std::cout << G_CNT << std::endl;
 
 	ssize_t err = recv(-1, msg, 4000, 0);
 	pthread_exit(0);
@@ -52,16 +56,17 @@ void *tcp_shk(void *arg) {
 void *server_receive(void *arg) {
 	char msg[4000];
 
-	while (1) {
+	while (true) {
 		ssize_t err = recv(sock_client, msg, 4000, 0);
+		
 		if (err > 0) {
 			msg[3999] = '\0';
+
+			G_SYN_CNT++;
+			std::cout << "Connection SYN №" << G_SYN_CNT << " received" << std::endl;
 			
-			std::cout << "Connection ACK received" << std::endl;
 			pthread_t thread;
 			pthread_create(&thread, NULL, tcp_shk, NULL);
-			if (err == -1)
-				handle_error_en(-1, "send");
 		}
 
 		if (err == 0) {
@@ -77,7 +82,6 @@ void *server_receive(void *arg) {
 }
 
 int main(int argc, char **argv) {
-	system("clear");
 
 	pthread_attr_t attr;
 
@@ -108,30 +112,33 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	int *client = (int *)malloc(sizeof(int));
 	int client_count = 0;
-	struct client_info **cinfo_arr = (struct client_info **)malloc(sizeof(struct client_info *) * 100);
-	int client_info_count = 0;
 
-	char *server_addr = inet_ntoa(server_sa.sin_addr);
+	std::string server_addr = inet_ntoa(server_sa.sin_addr);
 	in_port_t server_port = server_sa.sin_port;
-	printf("Server is ready.\n ip: %s:%d\n", server_addr, server_port);
 
-	while (1) {
+	std::cout << "Server started." << std::endl;
+	std::cout << "Host: " << server_addr << ":" << server_port << std::endl;
+
+	while (true) {
 		struct sockaddr_in client_sa;
+
 		socklen_t peer_addr_size = sizeof(struct sockaddr_in);
 		int sck = accept(socket_descr, (struct sockaddr *)&client_sa, (socklen_t *)&peer_addr_size);
-		char *client_addr = inet_ntoa(client_sa.sin_addr);
+
+		std::string client_addr = inet_ntoa(client_sa.sin_addr);
 		in_port_t client_port = client_sa.sin_port;
 
 		if (!is_connected && sck != -1) {
 			sock_client = sck;
-			printf("New connection: %s:%d\n", client_addr, client_port);
+			std::cout << "New client connection: " << client_addr << ":" << client_port << std::endl;
+
 			pthread_t thread;
 			pthread_create(&thread, &attr, server_receive, NULL);
 
-			is_connected = 1;
-			printf("%d\n", client_count++);
+			is_connected = true;
+			std::cout << "Client count: " << ++client_count << std::endl;
+
 			fflush(stdout);
 		}
 	}
@@ -140,14 +147,6 @@ int main(int argc, char **argv) {
 
 	if (err != 0)
 		handle_error_en(err, "pthread_attr_destroy");
-
-	free(client);
-
-	for (int i = 0; i < client_info_count; i++) {
-		free(cinfo_arr[i]);
-	}
-
-	free(cinfo_arr);
 
 	if (close(socket_descr) == -1)
 		handle_error_en(-1, "close");
