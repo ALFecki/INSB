@@ -16,4 +16,6 @@ private:
 
 	boost::asio::ip::tcp::acceptor acceptor_;
 	boost::asio::io_context& io_context_;
+
+	unsigned long long connectionNum = 0;
 };

@@ -5,12 +5,15 @@
 using namespace boost::asio;
 using namespace boost::asio::ip;
 
+unsigned long long connectionsNumber = 0;
+
 void handle_connect(const boost::system::error_code& error) {
 	if (error) {
-		std::cerr << "false" << std::endl;
+		std::cout << "Error in connection № " << ++connectionsNumber << std::endl;
+
 		throw std::runtime_error("Cannot connect.");
 	} else {
-		std::cerr << "true" << std::endl;
+		std::cout << "Connection № " << ++connectionsNumber << "successfully initialized!" << std::endl;
 	}
 }
 
@@ -68,11 +71,11 @@ int main(int argc, char* argv[]) {
 		for (int cnt = 0; cnt < connectionNum; ++cnt) {
 			auto ctx_ptr = new boost::asio::io_context();
 			auto skt_ptr = new tcp::socket(*ctx_ptr);
-			
-            contexts.push_back(ctx_ptr);
+
+			contexts.push_back(ctx_ptr);
 			sockets.push_back(skt_ptr);
-			
-            try {
+
+			try {
 				sockets.back()->async_connect(*endpoint_iterator, handle_connect);
 				contexts.back()->run();
 			} catch (...) {
@@ -81,17 +84,17 @@ int main(int argc, char* argv[]) {
 			}
 		}
 		io_context.run();
-		
-        for (auto& skt : sockets) {
+
+		for (auto& skt : sockets) {
 			skt->close();
 			delete skt;
 		}
-		
-        for (auto& ctx : contexts) {
+
+		for (auto& ctx : contexts) {
 			delete ctx;
 		}
-		
-        std::cout << connectionNum << " connections to " << host << ":" << port << "\n";
+
+		std::cout << connectionNum << " connections to " << host << ":" << port << "\n";
 	} catch (std::exception& e) {
 		std::cerr << "Error: " << e.what() << "\n";
 	}
