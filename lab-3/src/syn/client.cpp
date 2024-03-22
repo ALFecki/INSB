@@ -22,7 +22,7 @@ void *receive(void *arg) {
 		int err = recv(*server, msg, 255, 0);
 
 		if (err > 0) {
-			msg[256] = '\0';
+			msg[255] = '\0';
 			printf("%s", msg);
 			ct++;
 
@@ -43,11 +43,6 @@ void *receive(void *arg) {
 
 int main(int argc, char **argv) {
 	char datagram[4096], source_ip[32];
-	// IP header
-	// struct iphdr *iph = (struct iphdr *)datagram;
-	// // TCP header
-	// struct tcphdr *tcph = (struct tcphdr *)(datagram + sizeof(struct ip));
-	// struct pseudo_header psh;
 
 	strcpy(source_ip, "127.0.0.1");
 	memset(datagram, 0, 4096); /* zero out the buffer */
@@ -55,7 +50,7 @@ int main(int argc, char **argv) {
 	struct sockaddr_in sin;
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(8000);
-	sin.sin_addr.s_addr = inet_addr(source_ip);
+	sin.sin_addr.s_addr = inet_addr("127.0.0.1");
 
 	auto iph = fillIPHeader(datagram, source_ip, sin);
 	auto tcph = fillTCPHeader(datagram);
@@ -63,9 +58,10 @@ int main(int argc, char **argv) {
 
 	auto psh = fillFakeHeader(source_ip, sin);
 
-	memcpy(&psh.tcp, tcph.get(), sizeof(struct tcphdr));
+	memcpy(&psh.tcp, tcph, sizeof(struct tcphdr));
+	std::cout << psh.tcpLength << std::endl;
 
-	tcph->check = checksum((unsigned short *)&psh, sizeof(FakeHeader));
+	tcph->check = checksum((unsigned short *)&psh, sizeof(struct FakeHeader));
 
 	system("clear");
 	pthread_attr_t attr;
@@ -81,10 +77,10 @@ int main(int argc, char **argv) {
 
 	struct sockaddr_in server_sa;
 	server_sa.sin_family = AF_INET;
-	server_sa.sin_port = htons(1234);
-	server_sa.sin_addr.s_addr = inet_addr(source_ip);
+	server_sa.sin_port = htons(8000);
+	std::cout << server_sa.sin_port << std::endl;
+	server_sa.sin_addr.s_addr = inet_addr("127.0.0.1");
 	char user_name[14];
-	char txt[240], msg[256];
 
 	printf("Username: ");
 	scanf("%s", user_name);

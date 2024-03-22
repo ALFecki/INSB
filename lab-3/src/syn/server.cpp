@@ -14,7 +14,7 @@
 #include "libs/utils.cpp"
 
 int sock_client;
-std::atomic<int> G_CNT(0);
+std::atomic<long long> G_CNT(0);
 bool is_connected = false;
 
 void *tcp_shk(void *arg) {
@@ -24,6 +24,7 @@ void *tcp_shk(void *arg) {
 	memset(datagram, 0, 4096);
 
 	struct sockaddr_in sin;
+	
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(8000);
 	sin.sin_addr.s_addr = inet_addr(source_ip);
@@ -31,16 +32,15 @@ void *tcp_shk(void *arg) {
 	auto iph = fillIPHeader(datagram, source_ip, sin);
 	auto tcph = fillTCPHeader(datagram);
 	tcph->ack = 1;
-
 	auto psh = fillFakeHeader(source_ip, sin);
 
-	memcpy(&psh.tcp, tcph.get(), sizeof(struct tcphdr));
+	memcpy(&psh.tcp, tcph, sizeof(struct tcphdr));
 
 	tcph->check = checksum((unsigned short *)&psh, sizeof(FakeHeader));
 
 	send(sock_client, datagram, strlen(datagram), 0);
 
-	printf("send SYN+ACK, waiting for ACK ");
+	std::cout << "send SYN+ACK, waiting for ACK " << std::endl;
 	char msg[4000];
 	G_CNT++;
 	std::cout << G_CNT << std::endl;
@@ -54,16 +54,17 @@ void *server_receive(void *arg) {
 
 	while (1) {
 		ssize_t err = recv(sock_client, msg, 4000, 0);
-
 		if (err > 0) {
-			msg[4000] = '\0';
+			msg[3999] = '\0';
+			
+			std::cout << "Connection ACK received" << std::endl;
 			pthread_t thread;
 			pthread_create(&thread, NULL, tcp_shk, NULL);
 			if (err == -1)
 				handle_error_en(-1, "send");
 		}
 
-		if (err = 0) {
+		if (err == 0) {
 			break;
 		}
 

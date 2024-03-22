@@ -49,8 +49,8 @@ unsigned short checksum(unsigned short *ptr, int nbytes) {
 	return (answer);
 }
 
-std::unique_ptr<iphdr> fillIPHeader(char datagram[4096], const char source_ip[32], struct sockaddr_in sin) {
-	iphdr *ipHeader = (struct iphdr *)datagram;
+iphdr* fillIPHeader(char datagram[4096], const char source_ip[32], struct sockaddr_in sin) {
+	struct iphdr *ipHeader = (struct iphdr *)datagram;
 
 	ipHeader->ihl = 5;
 	ipHeader->version = 4;
@@ -65,10 +65,10 @@ std::unique_ptr<iphdr> fillIPHeader(char datagram[4096], const char source_ip[32
 	ipHeader->daddr = sin.sin_addr.s_addr;
 	ipHeader->check = checksum((unsigned short *)datagram, ipHeader->tot_len >> 1);
 
-	return std::unique_ptr<iphdr>(ipHeader);
+	return ipHeader;
 }
 
-std::unique_ptr<tcphdr> fillTCPHeader(char datagram[4096]) {
+tcphdr* fillTCPHeader(char datagram[4096]) {
 	struct tcphdr *tcpHeader = (struct tcphdr *)(datagram + sizeof(struct ip));
 
 	tcpHeader->source = htons(1234);
@@ -86,7 +86,7 @@ std::unique_ptr<tcphdr> fillTCPHeader(char datagram[4096]) {
 	tcpHeader->check = 0;
 	tcpHeader->urg_ptr = 0;
 
-	return std::unique_ptr<tcphdr>(tcpHeader);
+	return tcpHeader;
 }
 
 FakeHeader fillFakeHeader(const char source_ip[32], struct sockaddr_in sin) {
