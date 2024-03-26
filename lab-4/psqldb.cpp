@@ -34,6 +34,11 @@ bool PSQLDBHelper::executeQuery(QSqlQuery* query) {
 }
 
 void PSQLDBHelper::disconnect() {
-    qDebug() << "Disconnected From Database!";
+    qDebug() << "Disconnected from database!";
     db->close();
+}
+
+PSQLDBHelper::~PSQLDBHelper() {
+    qDebug() << "Destructor called!";
+    delete db;
 }
