@@ -22,7 +22,7 @@ void* receive(void* arg) {
 
         if (err > 0) {
             msg[255] = '\0';
-            std::cout << msg;
+            // std::cout << msg;
             ct++;
 
             if (ct > 2000)
