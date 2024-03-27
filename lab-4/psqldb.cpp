@@ -30,7 +30,7 @@ std::optional<QSqlQuery*> PSQLDBHelper::executeQuery(QSqlQuery* query) {
 
 int PSQLDBHelper::getUserRole(QString login, QString password) {
     QSqlQuery query;
-    query.prepare("SELECT role_id FROM user WHERE login = :login AND password = :password;");
+    query.prepare("SELECT role_id FROM users WHERE login = :login AND password = :password;");
     query.bindValue(":login", login);
     query.bindValue(":password", password);
 
@@ -45,6 +45,23 @@ int PSQLDBHelper::getUserRole(QString login, QString password) {
         }
     }
     return -1;
+}
+
+QList<User> PSQLDBHelper::getAllUsers() {
+    QSqlQuery query;
+    query.prepare("SELECT * FROM users;");
+    auto res = this->executeQuery(&query);
+    QList<User> users;
+    if (res.has_value()) {
+        auto values = res.value();
+        while (values->next()) {
+            users.append(User(query.value("id").toInt(),
+                              query.value("name").toString(),
+                              query.value("password").toString(),
+                              query.value("role_id").toInt()));
+        }
+    }
+    return users;
 }
 
 void PSQLDBHelper::disconnect() {

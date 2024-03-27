@@ -18,8 +18,12 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void successLogin(int);
+
 private:
     Ui::MainWindow *ui;
+    PSQLDBHelper dbConnection;
     LoginWindow *login;
 };
 #endif  // MAINWINDOW_H

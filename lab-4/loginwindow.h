@@ -16,19 +16,21 @@ namespace Ui {
 class LoginWindow;
 }
 
+enum Priviligies { ADMIN = 1, STAFF = 2, USER = 3 };
+
 class LoginWindow : public QMainWindow {
     Q_OBJECT
 
-signals:
-    void successLogin(int);
-
 public:
-    LoginWindow(QWidget *parent = nullptr);
+    LoginWindow(PSQLDBHelper *dbConnection, QWidget *parent = nullptr);
     ~LoginWindow();
+
+signals:
+    void success(int);
 
 private:
     void onLoginClicked();
-    PSQLDBHelper dbConnection;
+    PSQLDBHelper *dbConnection;
     Ui::LoginWindow *ui;
 };
 
