@@ -23,6 +23,7 @@ class LoginWindow : public QMainWindow {
 
 public:
     LoginWindow(PSQLDBHelper *dbConnection, QWidget *parent = nullptr);
+    void clearInputs();
     ~LoginWindow();
 
 signals:

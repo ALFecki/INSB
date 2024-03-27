@@ -28,6 +28,11 @@ void LoginWindow::onLoginClicked() {
     emit success(priviledge_level);
 }
 
+void LoginWindow::clearInputs() {
+    this->ui->login_le->clear();
+    this->ui->password_le->clear();
+}
+
 LoginWindow::~LoginWindow() {
     delete ui;
 }

@@ -20,6 +20,7 @@ public:
 
 private slots:
     void successLogin(int);
+    void logout();
 
 private:
     Ui::MainWindow *ui;
