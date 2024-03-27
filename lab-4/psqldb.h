@@ -11,15 +11,14 @@ class PSQLDBHelper {
 public:
     PSQLDBHelper(const char* driver);
     ~PSQLDBHelper();
-    QSqlDatabase* connectToDatabase(const QString& server,
-                                    const QString& databaseName,
-                                    const QString& userName,
-                                    const QString& password);
+    bool connectToDatabase(const QString& server,
+                           const QString& databaseName,
+                           const QString& userName,
+                           const QString& password);
     void disconnect();
 
-    //    int selectRowCountResult(QSqlQuery* query);
-    bool executeQuery(QSqlQuery* query);
-    //    bool executeUpdate(QSqlQuery* query);
+    std::optional<QSqlQuery*> executeQuery(QSqlQuery* query);
+    int getUserRole(QString login, QString password);
 
 private:
     QSqlDatabase* db;

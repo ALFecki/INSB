@@ -4,33 +4,47 @@ PSQLDBHelper::PSQLDBHelper(const char* driver) {
     db = new QSqlDatabase(QSqlDatabase::addDatabase(driver));
 }
 
-QSqlDatabase* PSQLDBHelper::connectToDatabase(const QString& server,
-                                              const QString& databaseName,
-                                              const QString& userName,
-                                              const QString& password) {
+bool PSQLDBHelper::connectToDatabase(const QString& server,
+                                     const QString& databaseName,
+                                     const QString& userName,
+                                     const QString& password) {
     this->db->setConnectOptions();
     this->db->setHostName(server);
     this->db->setDatabaseName(databaseName);
     this->db->setUserName(userName);
     this->db->setPassword(password);
 
-    if (this->db->open()) {
-        return this->db;
-    } else {
-        return NULL;
-    }
+    return this->db->open();
 }
 
-bool PSQLDBHelper::executeQuery(QSqlQuery* query) {
+std::optional<QSqlQuery*> PSQLDBHelper::executeQuery(QSqlQuery* query) {
     db->transaction();
-    bool queryRes = query->exec();
-    if (query->lastError().type() != QSqlError::NoError || !queryRes) {
+    if (!query->exec() || query->lastError().type() != QSqlError::NoError || !query->first()) {
         qDebug() << query->lastError().text();
         db->rollback();
-        return false;
+        return {};
     }
     db->commit();
-    return true;
+    return query;
+}
+
+int PSQLDBHelper::getUserRole(QString login, QString password) {
+    QSqlQuery query;
+    query.prepare("SELECT role_id FROM user WHERE login = :login AND password = :password;");
+    query.bindValue(":login", login);
+    query.bindValue(":password", password);
+
+    auto res = this->executeQuery(&query);
+    if (res.has_value()) {
+        long long role_id = res.value()->value(0).toInt();
+        query.prepare("SELECT level FROM roles WHERE id = :id;");
+        query.bindValue(":id", role_id);
+        res = this->executeQuery(&query);
+        if (res.has_value()) {
+            return res.value()->value(0).toInt();
+        }
+    }
+    return -1;
 }
 
 void PSQLDBHelper::disconnect() {
