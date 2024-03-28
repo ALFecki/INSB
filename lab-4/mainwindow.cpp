@@ -105,14 +105,32 @@ void MainWindow::refactor() {
             QMessageBox::warning(this, "Error", "The value is too long!");
             return;
         }
-        if (row >= users.size() || column >= 4) {
+        if (row >= users.size() || row < 0 || column >= 4 || column < 1) {
             QMessageBox::warning(this, "Error", "Invalid row or column number!");
             return;
         }
-        if ((column == 0 || column == 2) && value.contains(QRegularExpression("[a-zA-Z]"))) {
+        if (column == 2 && value.contains(QRegularExpression("[a-zA-Z]"))) {
             QMessageBox::warning(this, "Error", "In this column only numbers are available!");
             return;
         }
+        QString columnName;
+        switch (column) {
+            case 1:
+                columnName = "login";
+                break;
+            case 2:
+                columnName = "role_id";
+                break;
+            case 3:
+                columnName = "password";
+                break;
+        }
+        auto index = this->ui->usersTable->model()->index(row, 0);
+        if (dbConnection.updateRow(this->ui->usersTable->model()->data(index).toInt(), columnName, value)) {
+            QMessageBox::information(this, "Success!", "Data successfully updated!");
+            return;
+        }
+        QMessageBox::critical(this, "Error!", "Something went wrong in update");
     }
 }
 

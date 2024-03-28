@@ -21,6 +21,8 @@ std::optional<QSqlQuery*> PSQLDBHelper::executeQuery(QSqlQuery* query) {
     db->transaction();
     if (!query->exec() || query->lastError().type() != QSqlError::NoError || !query->first()) {
         qDebug() << query->lastError().text();
+        qDebug() << query->lastQuery();
+        qDebug() << query->executedQuery();
         db->rollback();
         return {};
     }
@@ -64,6 +66,24 @@ QList<User> PSQLDBHelper::getAllUsers() {
     }
     qDebug() << users.size();
     return users;
+}
+
+bool PSQLDBHelper::updateRow(int id, QString field, QString value) {
+    QSqlQuery query;
+    query.prepare(QString("UPDATE users SET %1 = :value WHERE id = :id;").arg(field));
+    query.bindValue(":value", value);
+    query.bindValue(":id", id);
+
+    db->transaction();
+    if (!query.exec() || query.lastError().type() != QSqlError::NoError) {
+        qDebug() << query.lastError().text();
+        qDebug() << query.lastQuery();
+        qDebug() << query.executedQuery();
+        db->rollback();
+        return false;
+    }
+    db->commit();
+    return true;
 }
 
 void PSQLDBHelper::disconnect() {

@@ -31,6 +31,7 @@ public:
     std::optional<QSqlQuery*> executeQuery(QSqlQuery* query);
     int getUserRole(QString login, QString password);
     QList<User> getAllUsers();
+    bool updateRow(int id, QString field, QString value);
 
 private:
     QSqlDatabase* db;
