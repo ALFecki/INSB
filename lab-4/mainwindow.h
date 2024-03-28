@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QStandardItemModel>
+#include <QTableView>
 
 #include "loginwindow.h"
 
@@ -16,15 +18,17 @@ class MainWindow : public QMainWindow {
 
 public:
     MainWindow(QWidget *parent = nullptr);
+    void fillTableView(QStandardItemModel *, Priviligies);
     ~MainWindow();
 
 private slots:
     void successLogin(int);
+    void refactor();
     void logout();
 
 private:
     Ui::MainWindow *ui;
     PSQLDBHelper dbConnection;
-    LoginWindow *login;
+    LoginWindow login;
 };
 #endif  // MAINWINDOW_H

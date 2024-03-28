@@ -34,5 +34,6 @@ void LoginWindow::clearInputs() {
 }
 
 LoginWindow::~LoginWindow() {
+    qDebug() << "Login desctructor called!";
     delete ui;
 }

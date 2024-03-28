@@ -54,13 +54,15 @@ QList<User> PSQLDBHelper::getAllUsers() {
     QList<User> users;
     if (res.has_value()) {
         auto values = res.value();
-        while (values->next()) {
+
+        do {
             users.append(User(query.value("id").toInt(),
-                              query.value("name").toString(),
+                              query.value("login").toString(),
                               query.value("password").toString(),
                               query.value("role_id").toInt()));
-        }
+        } while (values->next());
     }
+    qDebug() << users.size();
     return users;
 }
 

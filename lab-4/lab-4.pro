@@ -12,12 +12,14 @@ SOURCES += \
     loginwindow.cpp \
     main.cpp \
     mainwindow.cpp \
-    psqldb.cpp
+    psqldb.cpp \
+    refactordialog.cpp
 
 HEADERS += \
     loginwindow.h \
     mainwindow.h \
-    psqldb.h
+    psqldb.h \
+    refactordialog.h
 
 FORMS += \
     loginwindow.ui \
