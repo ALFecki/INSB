@@ -6,6 +6,7 @@
 #include <QTableView>
 
 #include "loginwindow.h"
+#include "refactordialog.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {

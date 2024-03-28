@@ -2,7 +2,7 @@
 
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget* parent)
+MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
       ui(new Ui::MainWindow),
       dbConnection(PSQLDBHelper("QPSQL")),
@@ -23,7 +23,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(this->ui->refactorButton, &QPushButton::clicked, this, &MainWindow::refactor);
 }
 
-void MainWindow::fillTableView(QStandardItemModel* model, Priviligies role) {
+void MainWindow::fillTableView(QStandardItemModel *model, Priviligies role) {
     model->setHeaderData(0, Qt::Horizontal, "ID");
     model->setHeaderData(1, Qt::Horizontal, "Name");
     if (role == Priviligies::ADMIN || role == Priviligies::STAFF) {
@@ -57,7 +57,7 @@ void MainWindow::successLogin(int lvl) {
     this->setCentralWidget(this->ui->centralwidget);
     qDebug() << &this->login;
     auto users = this->dbConnection.getAllUsers();
-    QStandardItemModel* model = nullptr;
+    QStandardItemModel *model = nullptr;
     switch (lvl) {
         case Priviligies::USER: {
             model = new QStandardItemModel(users.size(), 2);
@@ -91,6 +91,29 @@ void MainWindow::successLogin(int lvl) {
 }
 
 void MainWindow::refactor() {
+    refactorDialog dialog;
+    if (dialog.exec() == QDialog::Accepted) {
+        auto users = this->dbConnection.getAllUsers();
+        auto res = dialog.getValues();
+        int row = std::get<0>(res), column = std::get<1>(res);
+        QString value = std::get<2>(res);
+        if (value.isEmpty()) {
+            QMessageBox::warning(this, "Error", "Fill the value field!");
+            return;
+        }
+        if (value.size() > 25) {
+            QMessageBox::warning(this, "Error", "The value is too long!");
+            return;
+        }
+        if (row >= users.size() || column >= 4) {
+            QMessageBox::warning(this, "Error", "Invalid row or column number!");
+            return;
+        }
+        if ((column == 0 || column == 2) && value.contains(QRegularExpression("[a-zA-Z]"))) {
+            QMessageBox::warning(this, "Error", "In this column only numbers are available!");
+            return;
+        }
+    }
 }
 
 void MainWindow::logout() {
