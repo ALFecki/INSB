@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+    <DisplayName>Lab 4</DisplayName>
+    <Description>Install this nicely done lab 4.</Description>
+    <Version>0.1.0-1</Version>
+    <ReleaseDate>2024-03-29</ReleaseDate>
+    <Licenses>
+        <License name="Beer Public License" file="license.txt" />
+    </Licenses>
+    <Default>script</Default>
+    <Script>keyvalidation.qs</Script>
+    <UserInterfaces>
+        <UserInterface>keyvalidation.ui</UserInterface>
+    </UserInterfaces>
+</Package>

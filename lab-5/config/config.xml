@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+    <Name>Lab4 ISNB</Name>
+    <Version>1.0.0</Version>
+    <Title>Lab4 Installer</Title>
+    <Publisher>alf</Publisher>
+    <StartMenuDir>ISNB</StartMenuDir>
+    <TargetDir>@HomeDir@/ISNBLab4</TargetDir>
+</Installer>
