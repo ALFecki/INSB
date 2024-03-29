@@ -25,29 +25,6 @@ struct FakeHeader {
 	struct tcphdr tcp;
 };
 
-unsigned short checksum(unsigned short *ptr, int nbytes) {
-	long sum;
-	unsigned short oddbyte;
-	short answer;
-
-	sum = 0;
-	while (nbytes > 1) {
-		sum += *ptr++;
-		nbytes -= 2;
-	}
-	if (nbytes == 1) {
-		oddbyte = 0;
-		*((u_char *)&oddbyte) = *(u_char *)ptr;
-		sum += oddbyte;
-	}
-
-	sum = (sum >> 16) + (sum & 0xffff);
-	sum = sum + (sum >> 16);
-	answer = (short)~sum;
-
-	return (answer);
-}
-
 iphdr* fillIPHeader(char datagram[4096], const char source_ip[32], struct sockaddr_in sin) {
 	struct iphdr *ipHeader = (struct iphdr *)datagram;
 
@@ -96,4 +73,27 @@ FakeHeader fillFakeHeader(const char source_ip[32], struct sockaddr_in sin) {
 	fakeHeader.protocol = IPPROTO_TCP;
 	fakeHeader.tcpLength = htons(20);
 	return fakeHeader;
+}
+
+unsigned short checksum(unsigned short *ptr, int nbytes) {
+	long sum;
+	unsigned short oddbyte;
+	short answer;
+
+	sum = 0;
+	while (nbytes > 1) {
+		sum += *ptr++;
+		nbytes -= 2;
+	}
+	if (nbytes == 1) {
+		oddbyte = 0;
+		*((u_char *)&oddbyte) = *(u_char *)ptr;
+		sum += oddbyte;
+	}
+
+	sum = (sum >> 16) + (sum & 0xffff);
+	sum = sum + (sum >> 16);
+	answer = (short)~sum;
+
+	return (answer);
 }
