@@ -1,0 +1,460 @@
+#include <algorithm>
+#include <boost/regex.hpp>
+#include <cstdlib>
+#include <filesystem>
+#include <format>
+#include <fstream>
+#include <functional>
+#include <iostream>
+#include <numeric>
+#include <random>
+#include <set>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+
+std::unordered_set<std::string> NOT_NAMES = {
+    "main",
+    "include",
+    "type",
+    "enum",
+    "struct",
+    "QSqlDatabase",
+    "std::string",
+    "QSqlError",
+    "NoError",
+    "std",
+    "tuple",
+    "optional",
+    "DB",
+    "QSqlQuery",
+    "transaction",
+    "rollback",
+    "commit",
+    "size_t",
+    "textEdit",
+    "lastError",
+    "lastQuery",
+    "executedQuery",
+    "executeQuery",
+    "MyTextEdit",
+    "int",
+    "QMimeData",
+    "QWidget",
+    "get",
+    "QTextEdit",
+    "Q_OBJECT",
+    "arg",
+    "user_actions",
+    "Ui",
+    "QDirIterator",
+    "QDir",
+    "Files",
+    "QFileInfo",
+    "new",
+    "SLOT",
+    "Subdirectories",
+    "qint64",
+    "QMessageBox",
+    "warning",
+    "information",
+    "addItem",
+    "next",
+    "while",
+    "for",
+    "do",
+    "hasNext",
+    "canonicalFilePath",
+    "true",
+    "false",
+    "saveBtn",
+    "break",
+    "continue",
+    "critical",
+    "QList",
+    "append",
+    "toString",
+    "QListWidgetItem",
+    "QIODevice",
+    "ReadOnly",
+    "QTextStream",
+    "setPlainText",
+    "timeout",
+    "readAll",
+    "QTimer",
+    "setSingleShot",
+    "setInterval",
+    "connect",
+    "QObject",
+    "setEnabled",
+    "QString",
+    "QRect",
+    "startsWith",
+    "QStringList",
+    "deleteLater",
+    "start",
+    "currentItem",
+    "foundFiles",
+    "QFile",
+    "text",
+    "open",
+    "WriteOnly",
+    "toPlainText",
+    "close",
+    "insertFromMimeData",
+    "user_actions",
+    "nullptr",
+    "private",
+    "public",
+    "signals",
+    "explicit",
+    "static",
+    "const",
+    "include",
+    "ifndef",
+    "endif",
+    "define",
+    "bool",
+    "login",
+    "setupUi",
+    "protected",
+    "Accepted",
+    "switch",
+    "case",
+    "long",
+    "default",
+    "setHostName",
+    "setDatabaseName",
+    "setConnectOptions",
+    "setData",
+    "QMainWindow",
+    "qDebug",
+    "setUserName",
+    "setPassword",
+    "override",
+    "once",
+    "void",
+    "string",
+    "hasText",
+    "length",
+    "addDatabase",
+    "QLabel",
+    "QSpinBox",
+    "QDialog",
+    "QVBoxLayout",
+    "QDialogButtonBox",
+    "addWidget",
+    "Ok",
+    "Cancel",
+    "QLineEdit",
+    "QPushButton",
+    "accept",
+    "reject",
+    "accepted",
+    "rejected",
+    "return",
+    "slots",
+    "sign_in",
+    "atEnd",
+    "sign_out",
+    "login_in",
+    "password_in",
+    "dirPath",
+    "tuple",
+    "size",
+    "SIGNAL",
+    "delete",
+    "isEmpty",
+    "auto",
+    "if",
+    "first",
+    "else",
+    "value_or",
+    "this",
+    "emit",
+    "value",
+    "toInt",
+    "prepare",
+    "has_value",
+    "bindValue",
+    "exec",
+    "class",
+    "Password",
+    "namespace",
+    "QApplication",
+    "MainWindow",
+    "char",
+    "QSize",
+    "QT_BEGIN_NAMESPACE",
+    "QT_END_NAMESPACE",
+    "setCentralWidget",
+    "show",
+    "hide",
+    "centralWidget",
+    "setParent",
+    "setEchoMode",
+    "setMaxLength",
+    "setPlaceholderText",
+    "setEditTriggers",
+    "QAbstractItemView",
+    "NoEditTriggers",
+    "frame_4",
+    "User",
+    "setGeometry",
+    "setObjectName",
+    "clicked",
+    "index",
+    "model",
+    "data",
+    "QStandardItemModel",
+    "Qt",
+    "contains",
+    "QRegularExpression",
+    "setModel",
+    "logOut",
+    "usersTable",
+    "login_le",
+    "centralwidget",
+    "clear",
+    "password_le",
+    "pushButton",
+    "LoginWindow",
+    "refactorButton",
+    "Horizontal",
+    "setHeaderData"
+};
+
+std::random_device rd;
+std::mt19937 generator(rd());
+std::uniform_int_distribution<> distribution(0, 1'000'000);
+std::unordered_map<std::string, std::string> VAR_NAMES;
+
+std::string generateRandomName(int length) {
+    std::string possibleChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_";
+    std::string randomName;
+    do {
+        for (int i = 0; i < length; i++) {
+            randomName += possibleChars[distribution(generator) % possibleChars.size()];
+        }
+        if (!std::isalpha(randomName[0]) && randomName[0] != '_') {
+            randomName[0] = possibleChars[distribution(generator) % 52];
+        }
+    } while (VAR_NAMES.contains(randomName));
+    return randomName;
+}
+
+std::string getCmpSign(int lhs, int rhs) {
+    if (lhs == rhs) {
+        std::vector<std::string> cmp = {"==", ">=", "<="};
+        return cmp[distribution(generator) % cmp.size()];
+    } else if (lhs > rhs) {
+        std::vector<std::string> cmp = {"!=", ">=", ">"};
+        return cmp[distribution(generator) % cmp.size()];
+    } else {
+        std::vector<std::string> cmp = {"!=", "<=", "<"};
+        return cmp[distribution(generator) % cmp.size()];
+    }
+}
+
+std::string getOppositeCmpSign(int lhs, int rhs) {
+    if (lhs == rhs) {
+        return "!=";
+    } else if (lhs > rhs) {
+        return "<";
+    } else {
+        return ">";
+    }
+}
+
+std::string generateExpr(bool nested = false, int level = 0, int maxLevel = 3) {
+    if (!nested || level > maxLevel) {
+        auto val = distribution(generator);
+        return std::to_string(val % 12345);
+    } else {
+        bool nested1 = distribution(generator) % 2;
+        bool nested2 = distribution(generator) % 2;
+        std::vector<std::string> operators = {"+", "-", "*"};
+        return "(" + generateExpr(nested1, level + 1) + " " + operators[distribution(generator) % operators.size()] +
+               " " + generateExpr(nested2, level + 1) + ")";
+    }
+}
+
+std::string generateAssignment(std::string var) {
+    std::vector<std::string> types = {"int", "long long", "unsigned long long", "short"};
+    return types[distribution(generator) % types.size()] + " " + var + " = " + generateExpr(1);
+}
+
+std::string generateDeadCode() {
+    std::string result;
+    result += generateExpr() + ";\n";
+    result += generateAssignment(generateRandomName(5)) + ";\n";
+    return result;
+}
+
+std::string generateIfElse(const std::string &varName, int varValue, size_t level, size_t maxLevel, bool isTrue,
+                           const std::string &code, bool &wasInserted, std::vector<bool> path);
+
+void generateIfElseHelper(std::function<std::string(int, int)> getCmpSignFunc, bool isTrue, const std::string &varName,
+                          int varValue, size_t level, size_t maxLevel, const std::string &code, bool &wasInserted,
+                          const std::vector<bool> &path, std::string &result, const std::vector<bool> &ifPath,
+                          const std::vector<bool> &elsePath) {
+    bool isNextTrue = distribution(generator) % 2;
+    int ifVal = distribution(generator);
+    result += "if (" + varName + getCmpSignFunc(varValue, ifVal) + std::to_string(ifVal) + ") {\n";
+    auto newVarName = generateRandomName(10);
+    auto newVarValue = distribution(generator);
+    result += "int " + newVarName + " = " + std::to_string(newVarValue) + ";\n";
+    result += generateDeadCode();
+    result += generateIfElse(newVarName, newVarValue, level + 1, maxLevel, isNextTrue, code, wasInserted, ifPath);
+
+    if (isTrue == false) result += "} else {\n";
+
+    if (level == maxLevel && !wasInserted &&
+        static_cast<size_t>(std::count(path.begin(), path.end(), true)) == path.size()) {
+        result += code + '\n';
+        wasInserted = true;
+    } else {
+        result += "if (" + generateExpr() + "* (0xaBe4F - 0xaBe4F) * " + generateExpr() + ") {" + code + "}\n";
+    }
+
+    if (isTrue) result += "} else {\n";
+
+    newVarName = generateRandomName(10);
+    newVarValue = distribution(generator);
+    result += std::string((level + 1) * 4, ' ') + "int " + newVarName + " = " + std::to_string(newVarValue) + ";\n";
+    isNextTrue = distribution(generator) % 2;
+    result += generateIfElse(newVarName, newVarValue, level + 1, maxLevel, isNextTrue, code, wasInserted, elsePath);
+    result += "}\n";
+}
+
+std::string generateIfElse(const std::string &varName, int varValue, size_t level, size_t maxLevel, bool isTrue,
+                           const std::string &code, bool &wasInserted, std::vector<bool> path) {
+    if (level > maxLevel) {
+        return "";
+    }
+    std::string result;
+    auto ifPath = path, elsePath = path;
+    ifPath.push_back(isTrue);
+    elsePath.push_back(!isTrue);
+    std::function<std::string(int, int)> getCmpSignFunc = (isTrue ? getCmpSign : getOppositeCmpSign);
+    generateIfElseHelper(getCmpSignFunc, isTrue, varName, varValue, level, maxLevel, code, wasInserted, path, result,
+                         ifPath, elsePath);
+    return result;
+}
+
+std::string renameVars(const std::string &code) {
+    boost::regex pattern(R"((?<![<#\/])(?=(?:[^"']|"[^"]*"|'[^']*')*$)\b([a-zA-Z_]\w*)\b(?![<>]))");
+    std::string result = boost::regex_replace(
+        code, pattern,
+        [&](const boost::smatch &match) {
+            std::string varName = match.str(1);
+            // std::cout << varName << std::endl;
+            if (NOT_NAMES.contains(varName)) return match.str(0);
+            if (VAR_NAMES.find(varName) == VAR_NAMES.end()) {
+                VAR_NAMES[varName] = generateRandomName(10);
+            }
+            return VAR_NAMES[varName];
+        },
+        boost::match_default | boost::format_all);
+
+    return result;
+}
+
+std::string replaceNumbers(const std::string &code) {
+    boost::regex pattern(R"((?<!\.)\b(\d+)\b(?!\.))");
+    std::string result = boost::regex_replace(
+        code, pattern,
+        [&](const boost::smatch &match) {
+            std::string result;
+            int number = std::stoi(match.str(1));
+            int cur = 0;
+            int rem = number + 1;
+            int maxOpCnt = distribution(generator) % 4 + 2;
+            while (cur != number) {
+                if (maxOpCnt == 0) {
+                    result += "0x" + std::format("{:x}", rem - 1) + " + ";
+                    break;
+                }
+                int tmp = distribution(generator) % rem;
+                result += "0x" + std::format("{:x}", tmp) + " + ";
+                cur += tmp;
+                rem -= tmp;
+                maxOpCnt--;
+            }
+            result += "0x0";
+            return "(" + result + ")";
+        },
+        boost::match_default | boost::format_all);
+
+    return result;
+}
+
+std::string insertIfElse(const std::string &code) {
+    boost::regex pattern(R"((?<!\w\s|=\s)(\{)([^{}]+)(\}))");
+    std::string result = boost::regex_replace(
+        code, pattern,
+        [&](const boost::smatch &match) {
+            auto code = match.str(2);
+            // std::cout << code << std::endl;
+            bool wasInserted = false;
+            code = generateIfElse("a", distribution(generator) % 10000, 0, 4, distribution(generator) % 2, code,
+                                  wasInserted, {});
+            return match.str(1) + "  int a = 0xaB1f * 0xBc94 - 0x7e0db1EC;" + code + match.str(3);
+        },
+        boost::match_default | boost::format_all);
+    return result;
+}
+
+std::string obfuscate(const std::string &code) {
+    std::string result;
+    result = renameVars(code);
+    result = insertIfElse(result);
+    // std::cout << result << std::endl;
+    result = replaceNumbers(result);
+    return result;
+}
+
+std::vector<std::filesystem::path> getFileNames(const std::filesystem::path &dataDir) {
+    std::vector<std::filesystem::path> fileNames;
+    for (const auto &entry : std::filesystem::recursive_directory_iterator(dataDir)) {
+        if (entry.is_regular_file() && (entry.path().extension() == ".cpp" || entry.path().extension() == ".h")) {
+            std::filesystem::path filePath = std::filesystem::absolute(entry.path()).lexically_normal();
+            fileNames.push_back(filePath);
+        }
+    }
+    return fileNames;
+}
+
+std::string readFile(const std::filesystem::path &path) {
+    std::string comm = "clang-format -i " + path.string();
+    system(comm.c_str());
+    auto file = std::ifstream(path);
+    std::string code;
+    std::string line;
+    while (std::getline(file, line)) {
+        code += line + '\n';
+    }
+    file.close();
+    return code;
+}
+
+int main() {
+    auto fileNames = getFileNames("../../lab-files");
+    for (const auto &path : fileNames) {
+        std::cout << path << std::endl;
+        auto code = readFile(path);
+        std::string obfuscated_code = obfuscate(code);
+        std::string from = "lab-files";
+        std::string to = "lab-files-obfuscated";
+        size_t replacePos = path.string().find(from);
+        auto outPath = std::filesystem::path(path.string().replace(replacePos, from.size(), to));
+        std::ofstream out(outPath);
+        out << obfuscated_code;
+        out.close();
+        std::string comm = "clang-format -i " + outPath.string();
+        system(comm.c_str());
+    }
+
+    return 0;
+}

@@ -111,9 +111,8 @@ void MainWindow::refactor() {
         } else if (column == 2) {
             columnName = "role_id";
 
-        }else if (column == 3) {
+        } else if (column == 3) {
             columnName = "password";
-
         }
         auto index = this->ui->usersTable->model()->index(row, 0);
         if (dbConnection.updateRow(this->ui->usersTable->model()->data(index).toInt(), columnName, value)) {
