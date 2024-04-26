@@ -45,6 +45,7 @@ std::unordered_set<std::string> NOT_NAMES = {
     "get",
     "QTextEdit",
     "Q_OBJECT",
+    "arg",
     "user_actions",
     "Ui",
     "QDirIterator",
@@ -118,12 +119,14 @@ std::unordered_set<std::string> NOT_NAMES = {
     "login",
     "setupUi",
     "protected",
-    "QDialog::Accepted",
+    "Accepted",
     "switch",
     "case",
+    "long",
     "default",
     "setHostName",
     "setDatabaseName",
+    "setConnectOptions",
     "setData",
     "QMainWindow",
     "qDebug",
@@ -141,8 +144,9 @@ std::unordered_set<std::string> NOT_NAMES = {
     "QDialog",
     "QVBoxLayout",
     "QDialogButtonBox",
-    "QDialogButtonBox::Ok",
-    "QDialogButtonBox::Cancel",
+    "addWidget",
+    "Ok",
+    "Cancel",
     "QLineEdit",
     "QPushButton",
     "accept",
@@ -201,8 +205,23 @@ std::unordered_set<std::string> NOT_NAMES = {
     "setObjectName",
     "clicked",
     "index",
+    "model",
+    "data",
     "QStandardItemModel",
-    "Qt::Horizontal",
+    "Qt",
+    "contains",
+    "QRegularExpression",
+    "setModel",
+    "logOut",
+    "usersTable",
+    "login_le",
+    "centralwidget",
+    "clear",
+    "password_le",
+    "pushButton",
+    "LoginWindow",
+    "refactorButton",
+    "Horizontal",
     "setHeaderData"
 };
 
@@ -330,6 +349,7 @@ std::string renameVars(const std::string &code) {
         code, pattern,
         [&](const boost::smatch &match) {
             std::string varName = match.str(1);
+            // std::cout << varName << std::endl;
             if (NOT_NAMES.contains(varName)) return match.str(0);
             if (VAR_NAMES.find(varName) == VAR_NAMES.end()) {
                 VAR_NAMES[varName] = generateRandomName(10);
@@ -376,6 +396,7 @@ std::string insertIfElse(const std::string &code) {
         code, pattern,
         [&](const boost::smatch &match) {
             auto code = match.str(2);
+            // std::cout << code << std::endl;
             bool wasInserted = false;
             code = generateIfElse("a", distribution(generator) % 10000, 0, 4, distribution(generator) % 2, code,
                                   wasInserted, {});
@@ -389,6 +410,7 @@ std::string obfuscate(const std::string &code) {
     std::string result;
     result = renameVars(code);
     result = insertIfElse(result);
+    // std::cout << result << std::endl;
     result = replaceNumbers(result);
     return result;
 }
