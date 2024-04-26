@@ -440,13 +440,13 @@ std::string readFile(const std::filesystem::path &path) {
 }
 
 int main() {
-    auto fileNames = getFileNames("../../lab-files");
+    auto fileNames = getFileNames("../../../lab-4");
     for (const auto &path : fileNames) {
         std::cout << path << std::endl;
         auto code = readFile(path);
         std::string obfuscated_code = obfuscate(code);
-        std::string from = "lab-files";
-        std::string to = "lab-files-obfuscated";
+        std::string from = "lab-4";
+        std::string to = "lab-6/obfuscated";
         size_t replacePos = path.string().find(from);
         auto outPath = std::filesystem::path(path.string().replace(replacePos, from.size(), to));
         std::ofstream out(outPath);
