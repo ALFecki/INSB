@@ -58,32 +58,24 @@ void MainWindow::successLogin(int lvl) {
     qDebug() << &this->login;
     auto users = this->dbConnection.getAllUsers();
     QStandardItemModel *model = nullptr;
-    switch (lvl) {
-        case Priviligies::USER: {
-            model = new QStandardItemModel(users.size(), 2);
-            this->ui->refactorButton->hide();
-            this->ui->logOut->show();
-            break;
-        }
-        case Priviligies::STAFF: {
-            model = new QStandardItemModel(users.size(), 3);
-            this->ui->refactorButton->hide();
-            this->ui->logOut->show();
-            break;
-        }
-        case Priviligies::ADMIN: {
-            model = new QStandardItemModel(users.size(), 4);
-            this->ui->refactorButton->show();
-            this->ui->logOut->show();
-            break;
-        }
-        default: {
-            QMessageBox::critical(this, "Access denied", "You have no needed role!");
-            this->ui->refactorButton->hide();
-            this->ui->usersTable->hide();
-            this->ui->logOut->show();
-            return;
-        }
+    if (lvl == Priviligies::USER) {
+        model = new QStandardItemModel(users.size(), 2);
+        this->ui->refactorButton->hide();
+        this->ui->logOut->show();
+    } else if (lvl == Priviligies::STAFF) {
+        model = new QStandardItemModel(users.size(), 3);
+        this->ui->refactorButton->hide();
+        this->ui->logOut->show();
+    } else if (lvl == Priviligies::ADMIN) {
+        model = new QStandardItemModel(users.size(), 4);
+        this->ui->refactorButton->show();
+        this->ui->logOut->show();
+    } else {
+        QMessageBox::critical(this, "Access denied", "You have no needed role!");
+        this->ui->refactorButton->hide();
+        this->ui->usersTable->hide();
+        this->ui->logOut->show();
+        return;
     }
     fillTableView(model, Priviligies(lvl));
     this->ui->usersTable->setModel(model);
@@ -114,16 +106,14 @@ void MainWindow::refactor() {
             return;
         }
         QString columnName;
-        switch (column) {
-            case 1:
-                columnName = "login";
-                break;
-            case 2:
-                columnName = "role_id";
-                break;
-            case 3:
-                columnName = "password";
-                break;
+        if (column == 1) {
+            columnName = "login";
+        } else if (column == 2) {
+            columnName = "role_id";
+
+        }else if (column == 3) {
+            columnName = "password";
+
         }
         auto index = this->ui->usersTable->model()->index(row, 0);
         if (dbConnection.updateRow(this->ui->usersTable->model()->data(index).toInt(), columnName, value)) {
