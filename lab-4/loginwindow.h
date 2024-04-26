@@ -8,7 +8,7 @@
 #include "ui_loginwindow.h"
 
 #define DB_HOST "localhost"
-#define DB_NAME "lab-4"
+#define DB_NAME "lab"
 #define DB_USER "root"
 #define DB_PASSWORD "root"
 
@@ -19,20 +19,20 @@ class LoginWindow;
 enum Priviligies { ADMIN = 1, STAFF = 2, USER = 3 };
 
 class LoginWindow : public QMainWindow {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    LoginWindow(PSQLDBHelper *dbConnection, QWidget *parent = nullptr);
-    void clearInputs();
-    ~LoginWindow();
+  LoginWindow(PSQLDBHelper *dbConnection, QWidget *parent = nullptr);
+  void clearInputs();
+  ~LoginWindow();
 
 signals:
-    void success(int);
+  void success(int);
 
 private:
-    void onLoginClicked();
-    PSQLDBHelper *dbConnection;
-    Ui::LoginWindow *ui;
+  void onLoginClicked();
+  PSQLDBHelper *dbConnection;
+  Ui::LoginWindow *ui;
 };
 
-#endif  // LOGINWINDOW_H
+#endif // LOGINWINDOW_H

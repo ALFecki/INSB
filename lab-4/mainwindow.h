@@ -16,21 +16,21 @@ class MainWindow;
 QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-    void fillTableView(QStandardItemModel *, Priviligies);
-    ~MainWindow();
+  MainWindow(QWidget *parent = nullptr);
+  void fillTableView(QStandardItemModel *, Priviligies);
+  ~MainWindow();
 
 private slots:
-    void successLogin(int);
-    void refactor();
-    void logout();
+  void successLogin(int);
+  void refactor();
+  void logout();
 
 private:
-    Ui::MainWindow *ui;
-    PSQLDBHelper dbConnection;
-    LoginWindow login;
+  Ui::MainWindow *ui;
+  PSQLDBHelper dbConnection;
+  LoginWindow login;
 };
-#endif  // MAINWINDOW_H
+#endif // MAINWINDOW_H
